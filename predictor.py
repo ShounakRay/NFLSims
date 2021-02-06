@@ -3,9 +3,10 @@
 # @Email:  rijshouray@gmail.com
 # @Filename: predictor.py
 # @Last modified by:   Ray
-# @Last modified time: 05-Feb-2021 20:02:11:118  GMT-0700
+# @Last modified time: 06-Feb-2021 01:02:89:894  GMT-0700
 # @License: [Private IP]
 
+import math
 import os
 import re
 
@@ -29,7 +30,22 @@ for f_name in pbp_files:
         except Exception as e:
             print('Failed, please see data!\n\t' + str(e) + '\n\n')
 
-    df_ALL.append(name)
+    exec('df_ALL.append(' + name + ')')
 
+df_MERGED = pd.concat(df_ALL, axis=0, ignore_index=True)
+infer_objects = df_MERGED.infer_objects()
+
+trivial = ['GameId', 'Description']
+
+for col in df_MERGED.columns:
+    try:
+        if(len(df_MERGED[col].unique()) == 1):
+            print('Dropping `' + col + '`...')
+            print(list(df_MERGED[col].unique()))
+            df_MERGED.drop(col, axis=1, inplace=True)
+    except Exception as e:
+        print('Unable to accurately process `' + col + '`' + '\n' + str(e))
+
+math.isnan(list(df_MERGED['IsMeasurement'].unique())[1])
 
 # EOF
