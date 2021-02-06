@@ -3,7 +3,7 @@
 # @Email:  rijshouray@gmail.com
 # @Filename: predictor.py
 # @Last modified by:   Ray
-# @Last modified time: 06-Feb-2021 01:02:89:894  GMT-0700
+# @Last modified time: 06-Feb-2021 01:02:47:472  GMT-0700
 # @License: [Private IP]
 
 import math
@@ -13,6 +13,20 @@ import re
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+
+def drop_low_cardinality(df):
+    df.dropna(axis=1, how='all', inplace=True)
+    for col in df.columns:
+        try:
+            if(len(df[col].unique()) == 1):
+                print('Dropping `' + col + '`...')
+                df.drop(col, axis=1, inplace=True)
+        except Exception as e:
+            print('Unable to accurately process `' + col + '`' + '\n' + str(e))
+
+    return df
+
 
 pbp_files = list(os.walk(r'Data'))[0][2]
 df_ALL = []
@@ -33,19 +47,13 @@ for f_name in pbp_files:
     exec('df_ALL.append(' + name + ')')
 
 df_MERGED = pd.concat(df_ALL, axis=0, ignore_index=True)
-infer_objects = df_MERGED.infer_objects()
+df_MERGED = df_MERGED.infer_objects()
 
 trivial = ['GameId', 'Description']
+for col in trivial:
+    df_MERGED.drop(col, axis=1, inplace=True)
 
-for col in df_MERGED.columns:
-    try:
-        if(len(df_MERGED[col].unique()) == 1):
-            print('Dropping `' + col + '`...')
-            print(list(df_MERGED[col].unique()))
-            df_MERGED.drop(col, axis=1, inplace=True)
-    except Exception as e:
-        print('Unable to accurately process `' + col + '`' + '\n' + str(e))
+df_MERGED = drop_low_cardinality(df_MERGED)
 
-math.isnan(list(df_MERGED['IsMeasurement'].unique())[1])
 
 # EOF
